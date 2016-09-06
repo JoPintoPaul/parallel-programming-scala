@@ -1,6 +1,7 @@
 
 import common._
 
+import scala.collection.immutable.IndexedSeq
 import scalashop._
 
 package object scalashop {
@@ -69,47 +70,36 @@ package object scalashop {
 
 
   def breakpoints(dimension: Int, numTasks: Int): List[(Int, Int)] = {
-    val partitions: Int = Math.max(dimension / numTasks, 1)
-    val range: Range = 0 to dimension by partitions
-    val topIndex = if (numTasks > range.length) range.length else numTasks
+//    val partitions: Int = Math.max(dimension / numTasks, 1)
+//    val range: Range = 0 to dimension by partitions
+//    val topIndex = if (numTasks > range.length) range.length else numTasks
+//
+//    val incompleteBreakpoints: List[(Int, Int)] = (for (i <- 1 until topIndex) yield {
+//      (range(i - 1), range(i))
+//    }).toList
 
-    val incompleteBreakpoints: List[(Int, Int)] = (for (i <- 1 until topIndex) yield {
-      (range(i - 1), range(i))
-    }).toList
+//    val r = calculateRange(dimension, numTasks)
+//    println(r)
+//    r
 
-    calculateRange(dimension, numTasks)
+//    incompleteBreakpoints.length match {
+//      case 0 => List((0, dimension))
+//      case i => incompleteBreakpoints.last._2 match {
+//        case add if add < dimension => incompleteBreakpoints :+(add, dimension)
+//        case _ => incompleteBreakpoints
+//      }
+//    }
 
-    incompleteBreakpoints.length match {
-      case 0 => List((0, dimension))
-      case i => incompleteBreakpoints.last._2 match {
-        case add if add < dimension => incompleteBreakpoints :+(add, dimension)
-        case _ => incompleteBreakpoints
-      }
-    }
-  }
-
-  def calculateRange(dimension: Int, numTasks: Int) = {
     val step: Int = Math.max(dimension / numTasks, 1)
-    println(s"partitions: $step")
-    val range: Range = 0 to dimension by step
-    val topIndex = Math.min(numTasks, range.length)
-      //if (numTasks > range.length) range.length else numTasks
-
-    val incompleteBreakpoints: List[(Int, Int)] = (for (i <- 1 until topIndex) yield {
-      (range(i - 1), range(i))
-    }).toList
-
-    val breaks = incompleteBreakpoints.length match {
-      case 0 => List((0, dimension))
-      case i => incompleteBreakpoints.last._2 match {
-        case add if add < dimension => incompleteBreakpoints :+(add, dimension)
-        case _ => incompleteBreakpoints
+    val range: List[Int] = (0 to dimension by step).toList
+    val breaks: List[Int] = range.length match {
+      case 1 => List(0, dimension)
+      case _ => range.last match {
+        case complete if complete == dimension => range
+        case _ => range :+ dimension
       }
     }
 
-    println(s"incomplete breaks: $incompleteBreakpoints")
-    println(s"old style breaks: $breaks")
-
-    incompleteBreakpoints
+    (for (i <- 1 until breaks.length) yield (breaks(i - 1), breaks(i))).toList
   }
 }
